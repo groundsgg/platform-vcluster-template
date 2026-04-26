@@ -1,0 +1,23 @@
+{{/*
+ConfigMap consumed by the Velocity Pod via `envFrom`. All GROUNDS_AGONES_*
+keys are emitted explicitly — including empty strings — so the chart's
+intent overrides any defaults baked into the image's plugin-agones build.
+
+`port` is rendered as a string (env-var values must be strings); plugin-agones
+parses it back to int with `?.toIntOrNull()`.
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-agones-config" (include "platform-vcluster-template.velocityName" .) }}
+  labels:
+    {{- include "platform-vcluster-template.velocityLabels" . | nindent 4 }}
+data:
+  GROUNDS_AGONES_NAMESPACE: {{ .Values.agones.namespace | quote }}
+  GROUNDS_AGONES_LABEL_SELECTOR: {{ .Values.agones.labelSelector | quote }}
+  GROUNDS_AGONES_LOBBY_LABEL: {{ .Values.agones.lobbyLabel | quote }}
+  GROUNDS_AGONES_LOBBY_VALUE: {{ .Values.agones.lobbyValue | quote }}
+  GROUNDS_AGONES_RUNNING_STATES: {{ .Values.agones.runningStates | quote }}
+  GROUNDS_AGONES_POLL_INTERVAL: {{ .Values.agones.pollInterval | quote }}
+  GROUNDS_AGONES_ADDRESS_TYPE: {{ .Values.agones.addressType | quote }}
+  GROUNDS_AGONES_PORT: {{ .Values.agones.port | quote }}
