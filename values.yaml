@@ -1,4 +1,76 @@
-# Placeholder values — populated in T2 (values + schema).
-# This skeleton only carries the minimum needed for `helm lint` to pass.
+# platform-vcluster-template — default values.
+#
+# Per spec §7 in grounds-platform/docs/specs/2026-04-26-platform-vcluster-template.md.
+# `cluster.name` is REQUIRED — `helm install` rejects an empty value via
+# values.schema.json.
+
+# ─── Image ─────────────────────────────────────────────────────────────────
+# `ghcr.io/groundsgg/velocity` is the existing Grounds Velocity image
+# (source: groundsgg/containers/velocity). The first deployable chart release
+# (0.1.0) targets the bumped image that bundles plugin-agones with env-var
+# Discovery — until that image is built, this chart's behaviour at runtime
+# (no Agones discovery via env vars) is degraded by design.
+image:
+  repository: ghcr.io/groundsgg/velocity
+  tag: "" # empty → Chart.appVersion
+  pullPolicy: IfNotPresent
+  imagePullSecrets: []
+
+# ─── Cluster identity ──────────────────────────────────────────────────────
+# Set by grounds-forge on install. Used in the public hostname
+# `{cluster.name}.platform.mc.grnds.io`. REQUIRED — schema-enforced.
 cluster:
   name: ""
+
+# ─── plugin-agones discovery (env vars, written to a ConfigMap) ────────────
+# All values are optional; empty strings carry semantic meaning per the
+# plugin's env-var contract:
+#   namespace=""        → fall through to POD_NAMESPACE (Downward API)
+#   labelSelector=""    → no k8s-side filter (every running GS is candidate)
+#   lobbyLabel=""       → treat every running GS as lobby (per-dev semantic)
+agones:
+  namespace: ""
+  labelSelector: ""
+  lobbyLabel: ""
+  lobbyValue: lobby
+  runningStates: "Ready,Allocated,Reserved"
+  pollInterval: "2s"
+  addressType: PodIP
+  port: 25565
+
+# ─── Velocity proxy ────────────────────────────────────────────────────────
+velocity:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  service:
+    type: ClusterIP
+    port: 25577
+  probes:
+    readiness:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    liveness:
+      initialDelaySeconds: 60
+      periodSeconds: 30
+
+# ─── Default Agones Fleet ──────────────────────────────────────────────────
+# Lets the developer connect immediately without having pushed a GameServer
+# of their own. Disable via `defaultFleet.enabled=false`.
+defaultFleet:
+  enabled: true
+  name: lobby
+  replicas: 1
+  image: gcr.io/agones-images/simple-game-server:0.30
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi

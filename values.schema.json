@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "platform-vcluster-template values",
+  "description": "Schema for values.yaml. Enforces required fields and types so Helm rejects misconfigurations at install time.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["cluster", "image"],
+  "properties": {
+    "image": {
+      "type": "object",
+      "required": ["repository"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Container image repository (without tag)."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Image tag. Empty string falls back to Chart.appVersion."
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      }
+    },
+    "cluster": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Sanitised developer handle. Used in the public hostname."
+        }
+      }
+    },
+    "agones": {
+      "type": "object",
+      "properties": {
+        "namespace": { "type": "string" },
+        "labelSelector": { "type": "string" },
+        "lobbyLabel": { "type": "string" },
+        "lobbyValue": { "type": "string", "minLength": 1 },
+        "runningStates": { "type": "string", "minLength": 1 },
+        "pollInterval": {
+          "type": "string",
+          "pattern": "^\\d+(s|m|h)$"
+        },
+        "addressType": {
+          "type": "string",
+          "enum": ["PodIP", "ExternalIP", "InternalIP", "Hostname"]
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "velocity": {
+      "type": "object",
+      "properties": {
+        "replicas": { "type": "integer", "minimum": 0 },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "requests": { "type": "object" },
+            "limits": { "type": "object" }
+          }
+        },
+        "service": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["ClusterIP", "NodePort", "LoadBalancer"]
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535
+            }
+          }
+        },
+        "probes": {
+          "type": "object",
+          "properties": {
+            "readiness": { "type": "object" },
+            "liveness": { "type": "object" }
+          }
+        }
+      }
+    },
+    "defaultFleet": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "name": { "type": "string", "minLength": 1 },
+        "replicas": { "type": "integer", "minimum": 0 },
+        "image": { "type": "string", "minLength": 1 },
+        "resources": { "type": "object" }
+      }
+    }
+  }
+}
