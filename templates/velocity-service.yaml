@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "platform-vcluster-template.velocityName" . }}
+  labels:
+    {{- include "platform-vcluster-template.velocityLabels" . | nindent 4 }}
+  {{- /*
+       The host-cluster mc-router (groundsgg/grounds-platform/infra)
+       watches Services with this annotation and routes incoming MC
+       traffic by the handshake's server_address.
+  */}}
+  annotations:
+    mc-router.itzg.me/externalServerName: {{ printf "%s.platform.mc.grnds.io" .Values.cluster.name | quote }}
+spec:
+  type: {{ .Values.velocity.service.type }}
+  ports:
+    - name: mc
+      port: {{ .Values.velocity.service.port }}
+      targetPort: mc
+      protocol: TCP
+  selector:
+    {{- include "platform-vcluster-template.velocitySelectorLabels" . | nindent 4 }}
