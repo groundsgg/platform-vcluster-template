@@ -1,0 +1,24 @@
+Grounds platform-dev workspace deployed for `{{ .Values.cluster.name }}`.
+
+Public hostname:
+  {{ .Values.cluster.name }}.platform.mc.grnds.io
+
+Verify the deploy:
+  kubectl -n {{ .Release.Namespace }} get deploy {{ include "platform-vcluster-template.velocityName" . }}
+  kubectl -n {{ .Release.Namespace }} get svc {{ include "platform-vcluster-template.velocityName" . }}
+{{ if .Values.defaultFleet.enabled }}
+Default Agones Fleet:
+  kubectl -n {{ .Release.Namespace }} get fleet {{ include "platform-vcluster-template.defaultFleetName" . }}
+  kubectl -n {{ .Release.Namespace }} get gameservers -l agones.dev/fleet={{ .Values.defaultFleet.name }}
+{{ else }}
+Default Fleet is disabled — push your own Agones Fleet to get a backend.
+{{ end -}}
+
+Plugin-agones discovery config (env vars in ConfigMap {{ include "platform-vcluster-template.velocityName" . }}-agones-config):
+  GROUNDS_AGONES_NAMESPACE       {{ .Values.agones.namespace | default "(POD_NAMESPACE via Downward API)" | quote }}
+  GROUNDS_AGONES_LABEL_SELECTOR  {{ .Values.agones.labelSelector | default "(no filter)" | quote }}
+  GROUNDS_AGONES_LOBBY_LABEL     {{ .Values.agones.lobbyLabel | default "(every running GS treated as lobby)" | quote }}
+  GROUNDS_AGONES_POLL_INTERVAL   {{ .Values.agones.pollInterval | quote }}
+
+To follow logs:
+  kubectl -n {{ .Release.Namespace }} logs -f deploy/{{ include "platform-vcluster-template.velocityName" . }}

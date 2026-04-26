@@ -1,0 +1,208 @@
+---
+# Source: platform-vcluster-template/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: platform-velocity
+  labels:
+    app.kubernetes.io/name: platform-vcluster-template
+    app.kubernetes.io/instance: platform
+    app.kubernetes.io/version: "0.6.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: platform-vcluster-template-0.0.0
+    app.kubernetes.io/component: velocity
+---
+# Source: platform-vcluster-template/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-velocity-agones-config
+  labels:
+    app.kubernetes.io/name: platform-vcluster-template
+    app.kubernetes.io/instance: platform
+    app.kubernetes.io/version: "0.6.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: platform-vcluster-template-0.0.0
+    app.kubernetes.io/component: velocity
+data:
+  GROUNDS_AGONES_NAMESPACE: ""
+  GROUNDS_AGONES_LABEL_SELECTOR: ""
+  GROUNDS_AGONES_LOBBY_LABEL: ""
+  GROUNDS_AGONES_LOBBY_VALUE: "lobby"
+  GROUNDS_AGONES_RUNNING_STATES: "Ready,Allocated,Reserved"
+  GROUNDS_AGONES_POLL_INTERVAL: "2s"
+  GROUNDS_AGONES_ADDRESS_TYPE: "PodIP"
+  GROUNDS_AGONES_PORT: "25565"
+---
+# Source: platform-vcluster-template/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: platform-velocity-agones
+  labels:
+    app.kubernetes.io/name: platform-vcluster-template
+    app.kubernetes.io/instance: platform
+    app.kubernetes.io/version: "0.6.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: platform-vcluster-template-0.0.0
+    app.kubernetes.io/component: velocity
+rules:
+  - apiGroups: ["agones.dev"]
+    resources: ["gameservers"]
+    verbs: ["get", "list", "watch"]
+---
+# Source: platform-vcluster-template/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: platform-velocity-agones
+  labels:
+    app.kubernetes.io/name: platform-vcluster-template
+    app.kubernetes.io/instance: platform
+    app.kubernetes.io/version: "0.6.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: platform-vcluster-template-0.0.0
+    app.kubernetes.io/component: velocity
+subjects:
+  - kind: ServiceAccount
+    name: platform-velocity
+roleRef:
+  kind: Role
+  name: platform-velocity-agones
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: platform-vcluster-template/templates/velocity-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-velocity
+  labels:
+    app.kubernetes.io/name: platform-vcluster-template
+    app.kubernetes.io/instance: platform
+    app.kubernetes.io/version: "0.6.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: platform-vcluster-template-0.0.0
+    app.kubernetes.io/component: velocity
+  annotations:
+    mc-router.itzg.me/externalServerName: "test.platform.mc.grnds.io"
+spec:
+  type: ClusterIP
+  ports:
+    - name: mc
+      port: 25577
+      targetPort: mc
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: platform-vcluster-template
+    app.kubernetes.io/instance: platform
+    app.kubernetes.io/component: velocity
+---
+# Source: platform-vcluster-template/templates/velocity-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-velocity
+  labels:
+    app.kubernetes.io/name: platform-vcluster-template
+    app.kubernetes.io/instance: platform
+    app.kubernetes.io/version: "0.6.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: platform-vcluster-template-0.0.0
+    app.kubernetes.io/component: velocity
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: platform-vcluster-template
+      app.kubernetes.io/instance: platform
+      app.kubernetes.io/component: velocity
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: platform-vcluster-template
+        app.kubernetes.io/instance: platform
+        app.kubernetes.io/component: velocity
+      annotations:
+        
+        checksum/agones-config: 3f012194fb55f62e56039216140f8b49610dc5fc463c1804f79a2b294e42e3fe
+    spec:
+      serviceAccountName: platform-velocity
+      containers:
+        - name: velocity
+          image: "ghcr.io/groundsgg/velocity:v0.7.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mc
+              containerPort: 25577
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: platform-velocity-agones-config
+          env:
+            
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            
+            - name: GROUNDS_CLUSTER_NAME
+              value: "test"
+          readinessProbe:
+            tcpSocket:
+              port: mc
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: mc
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+---
+# Source: platform-vcluster-template/templates/default-fleet.yaml
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  name: platform-lobby
+  labels:
+    app.kubernetes.io/name: platform-vcluster-template
+    app.kubernetes.io/instance: platform
+    app.kubernetes.io/version: "0.6.0"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: platform-vcluster-template-0.0.0
+    app.kubernetes.io/component: default-fleet
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: platform-vcluster-template
+        app.kubernetes.io/instance: platform
+        app.kubernetes.io/component: default-fleet
+        agones.dev/fleet: "lobby"
+    spec:
+      ports:
+        - name: default
+          portPolicy: Dynamic
+          containerPort: 7654
+          protocol: UDP
+      template:
+        spec:
+          containers:
+            - name: simple-game-server
+              image: "gcr.io/agones-images/simple-game-server:0.30"
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
