@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "platform-vcluster-template.velocityName" . }}
+  labels:
+    {{- include "platform-vcluster-template.velocityLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.velocity.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "platform-vcluster-template.velocitySelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "platform-vcluster-template.velocitySelectorLabels" . | nindent 8 }}
+      annotations:
+        {{/* Roll the Pod when the ConfigMap content changes — helm
+             upgrade picks up new env-var values without a manual restart. */}}
+        checksum/agones-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "platform-vcluster-template.velocityName" . }}
+      {{- with .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: velocity
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mc
+              containerPort: {{ .Values.velocity.service.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ printf "%s-agones-config" (include "platform-vcluster-template.velocityName" .) }}
+          env:
+            {{/* Downward API — plugin-agones falls through to this when
+                 GROUNDS_AGONES_NAMESPACE is empty (per-dev preset). */}}
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{/* Cluster identity — surfaced for any plugin/log line that
+                 needs it. The agones lobby-routing path does not consume it. */}}
+            - name: GROUNDS_CLUSTER_NAME
+              value: {{ .Values.cluster.name | quote }}
+          readinessProbe:
+            tcpSocket:
+              port: mc
+            initialDelaySeconds: {{ .Values.velocity.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.velocity.probes.readiness.periodSeconds }}
+          livenessProbe:
+            tcpSocket:
+              port: mc
+            initialDelaySeconds: {{ .Values.velocity.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.velocity.probes.liveness.periodSeconds }}
+          resources:
+            {{- toYaml .Values.velocity.resources | nindent 12 }}
