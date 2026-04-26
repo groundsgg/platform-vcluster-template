@@ -1,0 +1,25 @@
+apiVersion: v2
+name: platform-vcluster-template
+description: |
+  Per-developer vCluster Helm chart for the Grounds platform-dev profile.
+  Deploys Velocity (with plugin-agones), RBAC, ConfigMap envFrom, and an
+  optional default Agones Fleet inside a dev's vCluster.
+type: application
+version: 0.0.0
+# `appVersion` is the groundsgg/velocity image tag this chart targets.
+# Bumped when the image bundles a new plugin-agones release.
+appVersion: "0.6.0"
+keywords:
+  - grounds
+  - platform
+  - vcluster
+  - velocity
+  - agones
+  - minecraft
+home: https://github.com/groundsgg/platform-vcluster-template
+sources:
+  - https://github.com/groundsgg/platform-vcluster-template
+maintainers:
+  - name: Grounds Development Team
+    url: https://github.com/groundsgg
+icon: https://avatars.githubusercontent.com/u/192213632
