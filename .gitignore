@@ -1,0 +1,12 @@
+# Helm artefacts
+*.tgz
+charts/
+
+# OSX
+.DS_Store
+
+# Editors
+*.swp
+*.swo
+.idea
+.vscode

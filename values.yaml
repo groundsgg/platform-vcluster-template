@@ -1,0 +1,4 @@
+# Placeholder values — populated in T2 (values + schema).
+# This skeleton only carries the minimum needed for `helm lint` to pass.
+cluster:
+  name: ""
