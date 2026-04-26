@@ -1,0 +1,30 @@
+{{- if .Values.defaultFleet.enabled -}}
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  name: {{ include "platform-vcluster-template.defaultFleetName" . }}
+  labels:
+    {{- include "platform-vcluster-template.labels" . | nindent 4 }}
+    app.kubernetes.io/component: default-fleet
+spec:
+  replicas: {{ .Values.defaultFleet.replicas }}
+  template:
+    metadata:
+      labels:
+        {{- include "platform-vcluster-template.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: default-fleet
+        agones.dev/fleet: {{ .Values.defaultFleet.name | quote }}
+    spec:
+      ports:
+        - name: default
+          portPolicy: Dynamic
+          containerPort: 7654
+          protocol: UDP
+      template:
+        spec:
+          containers:
+            - name: simple-game-server
+              image: {{ .Values.defaultFleet.image | quote }}
+              resources:
+                {{- toYaml .Values.defaultFleet.resources | nindent 16 }}
+{{- end }}
