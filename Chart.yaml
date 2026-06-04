@@ -8,7 +8,7 @@ type: application
 version: 0.1.0
 # `appVersion` is the groundsgg/velocity image tag this chart targets.
 # Bumped when the image bundles a new plugin-agones release.
-appVersion: "0.9.0"
+appVersion: "0.9.1"
 keywords:
   - grounds
   - platform
