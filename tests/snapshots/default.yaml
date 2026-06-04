@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: platform-vcluster-template
     app.kubernetes.io/instance: platform
-    app.kubernetes.io/version: "0.9.0"
+    app.kubernetes.io/version: "0.9.1"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: platform-vcluster-template-0.1.0
     app.kubernetes.io/component: velocity
@@ -20,7 +20,7 @@ metadata:
   labels:
     app.kubernetes.io/name: platform-vcluster-template
     app.kubernetes.io/instance: platform
-    app.kubernetes.io/version: "0.9.0"
+    app.kubernetes.io/version: "0.9.1"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: platform-vcluster-template-0.1.0
     app.kubernetes.io/component: velocity
@@ -42,7 +42,7 @@ metadata:
   labels:
     app.kubernetes.io/name: platform-vcluster-template
     app.kubernetes.io/instance: platform
-    app.kubernetes.io/version: "0.9.0"
+    app.kubernetes.io/version: "0.9.1"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: platform-vcluster-template-0.1.0
     app.kubernetes.io/component: velocity
@@ -59,7 +59,7 @@ metadata:
   labels:
     app.kubernetes.io/name: platform-vcluster-template
     app.kubernetes.io/instance: platform
-    app.kubernetes.io/version: "0.9.0"
+    app.kubernetes.io/version: "0.9.1"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: platform-vcluster-template-0.1.0
     app.kubernetes.io/component: velocity
@@ -79,7 +79,7 @@ metadata:
   labels:
     app.kubernetes.io/name: platform-vcluster-template
     app.kubernetes.io/instance: platform
-    app.kubernetes.io/version: "0.9.0"
+    app.kubernetes.io/version: "0.9.1"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: platform-vcluster-template-0.1.0
     app.kubernetes.io/component: velocity
@@ -105,7 +105,7 @@ metadata:
   labels:
     app.kubernetes.io/name: platform-vcluster-template
     app.kubernetes.io/instance: platform
-    app.kubernetes.io/version: "0.9.0"
+    app.kubernetes.io/version: "0.9.1"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: platform-vcluster-template-0.1.0
     app.kubernetes.io/component: velocity
@@ -126,12 +126,12 @@ spec:
         app.kubernetes.io/component: velocity
       annotations:
         
-        checksum/agones-config: 9717a58c44cbf8ab6ec64864aeed774ab84ad8cd811d6b23d247f804881650cf
+        checksum/agones-config: f2cc0f937d19ecd58c5fc9d2f93144e3f149845973298ac1cd100500318cfa0c
     spec:
       serviceAccountName: platform-velocity
       containers:
         - name: velocity
-          image: "ghcr.io/groundsgg/velocity:0.9.0"
+          image: "ghcr.io/groundsgg/velocity:0.9.1"
           imagePullPolicy: IfNotPresent
           ports:
             - name: mc
@@ -175,7 +175,7 @@ metadata:
   labels:
     app.kubernetes.io/name: platform-vcluster-template
     app.kubernetes.io/instance: platform
-    app.kubernetes.io/version: "0.9.0"
+    app.kubernetes.io/version: "0.9.1"
     app.kubernetes.io/managed-by: Helm
     helm.sh/chart: platform-vcluster-template-0.1.0
     app.kubernetes.io/component: default-fleet
