@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/groundsgg/platform-vcluster-template/compare/v0.1.0...v0.1.0) (2026-06-04)
+
+
+### Bug Fixes
+
+* **deps:** target velocity image 0.9.1 ([#11](https://github.com/groundsgg/platform-vcluster-template/issues/11)) ([df4abac](https://github.com/groundsgg/platform-vcluster-template/commit/df4abac98eacf68929ae0f41774fc22315e917a7))
+
 ## 0.1.0 (2026-05-25)
 
 
